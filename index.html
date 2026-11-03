@@ -4,15 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>One Peak Two</title>
+<meta name="description" content="A quiet branch for shows and writing. Podcasts, video and essays.">
+<meta name="theme-color" content="#0b0c0b">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
 
   :root{
     --bg: #0b0c0b;
     --ink: #d8d6ce;
-    --muted: #6b6f66;
+    --muted: #8e9188;
     --dim: #26281f;
     --signal: #8ba07f;
     --signal-soft: rgba(139, 160, 127, 0.35);
@@ -42,37 +44,12 @@
     width: 100%;
     height: 100%;
     display: block;
-    cursor: crosshair;
-  }
-
-  .baseline{
-    position: absolute;
-    left: 0; right: 0;
-    top: 62%;
-    height: 1px;
-    background: var(--dim);
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  .corner{
-    position: absolute;
-    bottom: 28px;
-    right: 32px;
-    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    color: var(--dim);
-    z-index: 3;
-    text-align: right;
-    line-height: 1.6;
-    pointer-events: none;
   }
 
   .content{
     position: absolute;
     left: 7vw;
-    bottom: 12vh;
+    bottom: 9vh;
     max-width: none;
     z-index: 3;
     pointer-events: none;
@@ -98,32 +75,8 @@
     max-width: 560px;
   }
 
-  .readout{
-    position: absolute;
-    z-index: 4;
-    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
-    color: var(--ink);
-    background: rgba(11, 12, 11, 0.85);
-    border: 1px solid var(--dim);
-    padding: 5px 9px;
-    border-radius: 2px;
-    pointer-events: none;
-    opacity: 0;
-    transform: translate(-50%, -140%);
-    transition: opacity 0.25s ease;
-    white-space: nowrap;
-  }
-
-  .readout.visible{ opacity: 1; }
-
-  .readout .k{ color: var(--muted); margin-right: 6px; }
-
   @media (max-width: 640px){
     .content{ left: 6vw; right: 6vw; bottom: 9vh; max-width: none; }
-    .corner{ display: none; }
-    .readout{ display: none; }
   }
 </style>
 </head>
@@ -131,7 +84,6 @@
 
 <section class="hero">
   <canvas id="field"></canvas>
-  <div class="baseline"></div>
 
   <div class="content">
     <h1>one peak two</h1>
@@ -139,10 +91,6 @@
       A quiet branch for shows and writing. Podcasts, video and essays.
     </p>
   </div>
-
-  <div class="readout" id="readout"></div>
-
-  <div class="corner" id="clock">— · —</div>
 </section>
 
 <script>
@@ -150,11 +98,9 @@
   const canvas = document.getElementById('field');
   const ctx = canvas.getContext('2d');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const readoutEl = document.getElementById('readout');
 
   let W, H, dpr, points = [];
   const peakCenterFrac = 0.56;
-  const peakWidthFrac = 0.05;
 
   const colors = {
     dim: '#26281f',
@@ -199,7 +145,7 @@
     };
 
     const b1 = bump(w * 0.24, w * 0.055, -34);
-    const peak = bump(w * peakCenterFrac, w * peakWidthFrac, -92);
+    const peak = bump(w * peakCenterFrac, w * 0.05, -92);
     const b2 = bump(w * 0.82, w * 0.06, -30);
 
     return base + noise + b1 + peak + b2;
@@ -276,36 +222,6 @@
   } else {
     requestAnimationFrame(frame);
   }
-
-  // --- hover readout near the peak ---
-  canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const peakX = W * peakCenterFrac;
-    const threshold = W * peakWidthFrac * 2.4;
-
-    if (Math.abs(mx - peakX) < threshold){
-      const y = waveY(peakX);
-      readoutEl.style.left = (rect.left + peakX) + 'px';
-      readoutEl.style.top = (rect.top + y) + 'px';
-      readoutEl.innerHTML = '<span class="k">peak</span>0x' +
-        Math.floor(Math.abs(y - H) * 3.7).toString(16).padStart(3, '0');
-      readoutEl.classList.add('visible');
-    } else {
-      readoutEl.classList.remove('visible');
-    }
-  });
-
-  canvas.addEventListener('mouseleave', () => readoutEl.classList.remove('visible'));
-
-  // quiet corner readout — coordinate-style, not a real clock
-  const clockEl = document.getElementById('clock');
-  function tick(){
-    const n = () => Math.floor(Math.random() * 999).toString(16).padStart(3, '0');
-    clockEl.textContent = `0x${n()} · 0x${n()}`;
-  }
-  tick();
-  setInterval(tick, reduceMotion ? 0 : 4000);
 })();
 </script>
 
