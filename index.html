@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap');
 
   :root{
     --bg: #0b0c0b;
@@ -24,7 +24,7 @@
     margin: 0;
     height: 100%;
     background: var(--bg);
-    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-family: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -55,39 +55,11 @@
     pointer-events: none;
   }
 
-  .status{
-    position: absolute;
-    top: 28px;
-    right: 32px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    text-transform: uppercase;
-    z-index: 3;
-    pointer-events: none;
-  }
-
-  .status .dot{
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--signal);
-    box-shadow: 0 0 6px var(--signal-soft);
-    animation: pulse 3.4s ease-in-out infinite;
-  }
-
-  @keyframes pulse{
-    0%, 100% { opacity: 0.35; transform: scale(0.85); }
-    50% { opacity: 1; transform: scale(1); }
-  }
-
   .corner{
     position: absolute;
     bottom: 28px;
     right: 32px;
+    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     font-size: 11px;
     letter-spacing: 0.06em;
     color: var(--dim);
@@ -101,59 +73,35 @@
     position: absolute;
     left: 7vw;
     bottom: 12vh;
-    max-width: 540px;
+    max-width: none;
     z-index: 3;
     pointer-events: none;
   }
 
-  .eyebrow{
-    font-size: 13px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 0 0 20px 0;
-  }
-
-  .eyebrow::before{
-    content: "—";
-    margin-right: 8px;
-    color: var(--dim);
-  }
-
   h1{
     margin: 0;
-    font-size: clamp(2.6rem, 5vw, 4.1rem);
+    font-family: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-size: clamp(3rem, 6.4vw, 6.25rem);
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.045em;
     color: var(--ink);
-    line-height: 1.1;
+    line-height: 1;
   }
 
   .desc{
-    margin: 24px 0 0 0;
-    font-size: 16.5px;
-    line-height: 1.65;
+    margin: 32px 0 0 0;
+    font-family: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 300;
+    font-size: clamp(20px, 1.75vw, 27px);
+    line-height: 1.55;
     color: var(--muted);
-    max-width: 440px;
-  }
-
-  .consumers{
-    margin-top: 48px;
-    font-size: 13px;
-    letter-spacing: 0.05em;
-    color: var(--dim);
-    line-height: 1.7;
-  }
-
-  .consumers .list{
-    color: var(--muted);
-    display: block;
-    margin-top: 3px;
+    max-width: 560px;
   }
 
   .readout{
     position: absolute;
     z-index: 4;
+    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     font-size: 10.5px;
     letter-spacing: 0.04em;
     color: var(--ink);
@@ -175,12 +123,7 @@
   @media (max-width: 640px){
     .content{ left: 6vw; right: 6vw; bottom: 9vh; max-width: none; }
     .corner{ display: none; }
-    .status{ top: 20px; right: 20px; }
     .readout{ display: none; }
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .status .dot{ animation: none; opacity: 0.9; }
   }
 </style>
 </head>
@@ -190,20 +133,11 @@
   <canvas id="field"></canvas>
   <div class="baseline"></div>
 
-  <div class="status"><span class="dot"></span>operational</div>
-
   <div class="content">
-    <p class="eyebrow">privately owned by ryoka group</p>
     <h1>one peak two</h1>
     <p class="desc">
-      A quiet branch for data sourcing, analytics, and applied
-      intelligence. No product, no pricing, nothing to sign up for —
-      just infrastructure that runs in the background.
+      A quiet branch for shows and writing. Podcasts, video and essays.
     </p>
-    <div class="consumers">
-      reads from this layer
-      <span class="list">aegos · harova · kiroka</span>
-    </div>
   </div>
 
   <div class="readout" id="readout"></div>
