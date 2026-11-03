@@ -49,7 +49,7 @@
   .content{
     position: absolute;
     left: 7vw;
-    bottom: 9vh;
+    bottom: 16vh;
     max-width: none;
     z-index: 3;
     pointer-events: none;
@@ -75,8 +75,47 @@
     max-width: 560px;
   }
 
+  .contact{
+    position: absolute;
+    right: 7vw;
+    bottom: 16vh;
+    z-index: 3;
+    font-weight: 400;
+    font-size: clamp(18px, 1.45vw, 22px);
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: rgba(139, 160, 127, 0.45);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 7px;
+    transition: color .2s ease, text-decoration-color .2s ease;
+  }
+  .contact:hover{ color: var(--signal); text-decoration-color: var(--signal); }
+  .contact:focus-visible{ outline: 1px solid var(--signal); outline-offset: 6px; }
+  .legal{
+    position: absolute;
+    left: 7vw;
+    right: 7vw;
+    bottom: 24px;
+    z-index: 3;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .legal a{
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(142, 145, 136, 0.4);
+    text-underline-offset: 4px;
+  }
+  .legal a:hover{ color: var(--ink); }
+
   @media (max-width: 640px){
-    .content{ left: 6vw; right: 6vw; bottom: 9vh; max-width: none; }
+    .content{ left: 6vw; right: 6vw; bottom: 19vh; max-width: none; }
+    .contact{ left: 6vw; right: auto; bottom: 11vh; }
+    .legal{ left: 6vw; right: 6vw; bottom: 20px; }
   }
 </style>
 </head>
@@ -91,6 +130,10 @@
       A quiet branch for shows and writing. Podcasts, video and essays.
     </p>
   </div>
+
+  <a class="contact" href="mailto:media@onepeaktwo.com">media@onepeaktwo.com</a>
+
+  <p class="legal">© <span id="year">2026</span> One Peak Two. Part of <a href="https://ryokagroup.com">Ryoka Group</a>.</p>
 </section>
 
 <script>
@@ -132,7 +175,7 @@
 
   // waveform: gentle noise + three bumps — one tall peak flanked by two lesser ones
   function waveY(x){
-    const base = H * 0.62;
+    const base = H * 0.56;
     const w = W;
     const noise =
       Math.sin(x * 0.014) * 4 +
@@ -222,6 +265,8 @@
   } else {
     requestAnimationFrame(frame);
   }
+
+  document.getElementById('year').textContent = new Date().getFullYear();
 })();
 </script>
 
