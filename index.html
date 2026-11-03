@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Peak Two</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #0b0c0b;
+    --ink: #d8d6ce;
+    --muted: #6b6f66;
+    --dim: #26281f;
+    --signal: #8ba07f;
+    --signal-soft: rgba(139, 160, 127, 0.35);
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hero{
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 560px;
+    overflow: hidden;
+  }
+
+  canvas{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+  }
+
+  .baseline{
+    position: absolute;
+    left: 0; right: 0;
+    top: 62%;
+    height: 1px;
+    background: var(--dim);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .status{
+    position: absolute;
+    top: 28px;
+    right: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .status .dot{
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 6px var(--signal-soft);
+    animation: pulse 3.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse{
+    0%, 100% { opacity: 0.35; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  .corner{
+    position: absolute;
+    bottom: 28px;
+    right: 32px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+    z-index: 3;
+    text-align: right;
+    line-height: 1.6;
+    pointer-events: none;
+  }
+
+  .content{
+    position: absolute;
+    left: 7vw;
+    bottom: 12vh;
+    max-width: 540px;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .eyebrow{
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 20px 0;
+  }
+
+  .eyebrow::before{
+    content: "—";
+    margin-right: 8px;
+    color: var(--dim);
+  }
+
+  h1{
+    margin: 0;
+    font-size: clamp(2.6rem, 5vw, 4.1rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .desc{
+    margin: 24px 0 0 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--muted);
+    max-width: 440px;
+  }
+
+  .consumers{
+    margin-top: 48px;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--dim);
+    line-height: 1.7;
+  }
+
+  .consumers .list{
+    color: var(--muted);
+    display: block;
+    margin-top: 3px;
+  }
+
+  .readout{
+    position: absolute;
+    z-index: 4;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    background: rgba(11, 12, 11, 0.85);
+    border: 1px solid var(--dim);
+    padding: 5px 9px;
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -140%);
+    transition: opacity 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .readout.visible{ opacity: 1; }
+
+  .readout .k{ color: var(--muted); margin-right: 6px; }
+
+  @media (max-width: 640px){
+    .content{ left: 6vw; right: 6vw; bottom: 9vh; max-width: none; }
+    .corner{ display: none; }
+    .status{ top: 20px; right: 20px; }
+    .readout{ display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .status .dot{ animation: none; opacity: 0.9; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <canvas id="field"></canvas>
+  <div class="baseline"></div>
+
+  <div class="status"><span class="dot"></span>operational</div>
+
+  <div class="content">
+    <p class="eyebrow">privately owned by ryoka group</p>
+    <h1>one peak two</h1>
+    <p class="desc">
+      A quiet branch for data sourcing, analytics, and applied
+      intelligence. No product, no pricing, nothing to sign up for —
+      just infrastructure that runs in the background.
+    </p>
+    <div class="consumers">
+      reads from this layer
+      <span class="list">aegos · harova · kiroka</span>
+    </div>
+  </div>
+
+  <div class="readout" id="readout"></div>
+
+  <div class="corner" id="clock">— · —</div>
+</section>
+
+<script>
+(function(){
+  const canvas = document.getElementById('field');
+  const ctx = canvas.getContext('2d');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const readoutEl = document.getElementById('readout');
+
+  let W, H, dpr, points = [];
+  const peakCenterFrac = 0.56;
+  const peakWidthFrac = 0.05;
+
+  const colors = {
+    dim: '#26281f',
+    signal: '#8ba07f'
+  };
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seedPoints();
+  }
+
+  function seedPoints(){
+    const count = W < 640 ? 140 : 320;
+    points = [];
+    for (let i = 0; i < count; i++){
+      points.push({
+        x: Math.random() * W,
+        y: H * 0.18 + Math.random() * H * 0.62,
+        r: Math.random() * 1.1 + 0.3,
+        a: Math.random() * 0.35 + 0.05
+      });
+    }
+  }
+
+  // waveform: gentle noise + three bumps — one tall peak flanked by two lesser ones
+  function waveY(x){
+    const base = H * 0.62;
+    const w = W;
+    const noise =
+      Math.sin(x * 0.014) * 4 +
+      Math.sin(x * 0.037 + 1.3) * 2.4 +
+      Math.sin(x * 0.081 + 0.4) * 1.1;
+
+    const bump = (center, width, height) => {
+      const d = (x - center) / width;
+      return height * Math.exp(-d * d);
+    };
+
+    const b1 = bump(w * 0.24, w * 0.055, -34);
+    const peak = bump(w * peakCenterFrac, w * peakWidthFrac, -92);
+    const b2 = bump(w * 0.82, w * 0.06, -30);
+
+    return base + noise + b1 + peak + b2;
+  }
+
+  function drawDots(){
+    ctx.clearRect(0, 0, W, H);
+    for (const p of points){
+      ctx.beginPath();
+      ctx.fillStyle = colors.dim;
+      ctx.globalAlpha = p.a;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawWave(progressPx){
+    ctx.beginPath();
+    ctx.strokeStyle = colors.signal;
+    ctx.lineWidth = 1.4;
+    ctx.lineJoin = 'round';
+
+    const step = 4;
+    let started = false;
+    for (let x = 0; x <= progressPx; x += step){
+      const y = waveY(x);
+      if (!started){ ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    if (progressPx > 2){
+      ctx.lineTo(progressPx, H);
+      ctx.lineTo(0, H);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, H * 0.3, 0, H);
+      grad.addColorStop(0, 'rgba(139,160,127,0.10)');
+      grad.addColorStop(1, 'rgba(139,160,127,0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    if (progressPx > 0 && progressPx < W){
+      const y = waveY(progressPx);
+      ctx.beginPath();
+      ctx.fillStyle = colors.signal;
+      ctx.shadowColor = colors.signal;
+      ctx.shadowBlur = 10;
+      ctx.arc(progressPx, y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  function frame(t){
+    drawDots();
+    if (reduceMotion){
+      drawWave(W);
+    } else {
+      const cycle = 9000;
+      const progress = (t % cycle) / cycle;
+      drawWave(progress * W);
+      requestAnimationFrame(frame);
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  if (reduceMotion){
+    drawDots();
+    drawWave(W);
+  } else {
+    requestAnimationFrame(frame);
+  }
+
+  // --- hover readout near the peak ---
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const peakX = W * peakCenterFrac;
+    const threshold = W * peakWidthFrac * 2.4;
+
+    if (Math.abs(mx - peakX) < threshold){
+      const y = waveY(peakX);
+      readoutEl.style.left = (rect.left + peakX) + 'px';
+      readoutEl.style.top = (rect.top + y) + 'px';
+      readoutEl.innerHTML = '<span class="k">peak</span>0x' +
+        Math.floor(Math.abs(y - H) * 3.7).toString(16).padStart(3, '0');
+      readoutEl.classList.add('visible');
+    } else {
+      readoutEl.classList.remove('visible');
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => readoutEl.classList.remove('visible'));
+
+  // quiet corner readout — coordinate-style, not a real clock
+  const clockEl = document.getElementById('clock');
+  function tick(){
+    const n = () => Math.floor(Math.random() * 999).toString(16).padStart(3, '0');
+    clockEl.textContent = `0x${n()} · 0x${n()}`;
+  }
+  tick();
+  setInterval(tick, reduceMotion ? 0 : 4000);
+})();
+</script>
+
+</body>
+</html>
